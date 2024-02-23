@@ -1,40 +1,76 @@
-import React, { useState } from "react";
-import { Card, Button, Alert } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect} from "react";
+import { AgGridReact } from "ag-grid-react";
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/database';
+import { getDatabase, ref, get } from "firebase/database";
+import ThemeProvider from 'react-bootstrap/ThemeProvider'
+import Navigation from "./Navbar";
 
-import 'react-data-grid/lib/styles.css'
-import { DataGridDefaultRenderersProvider } from "react-data-grid";
+const MyGridComponent = () => {
 
-export default function Dashboard() {
-    const [error, setError] = useState("");
-    const { currentUser, logout } = useAuth();
-    const navigate = useNavigate();
+    const app = firebase.initializeApp({
+        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+        authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+        projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+        storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.REACT_APP_FIREBASE_APP_ID,
+        databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL
+    });
 
-    async function handleLogout() {
-        setError('')
+    const database = getDatabase(app);
+    const [rowData, setRowData] = useState([]);
 
-        try {
-            await logout()
-            navigate("/login")
-        } catch {
-            setError('Failed to log out. Please, try again.')
-        }
-    }
+    useEffect(() => {
+        const dbRef = ref(database, 'database/users/');
+        get(dbRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                setRowData(Object.values(data));
+            } else {
+                console.log('No data available');
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+    }, [database]);
 
+    const columnDefs = [
+        { 
+            headerName: 'userId', 
+            field: 'userId',
+            headerCheckboxSelection: true,
+            checkboxSelection: true, 
+        },
+        { headerName: 'Email', field: 'email' },
+        { headerName: 'Username', field: 'username' },
+    ];
+
+    return ( 
+        <div className="ag-theme-quartz" style={{ height: 300, Maxwidth: '70vw', minWidth: '30vw' }}>
+            <AgGridReact 
+                columnDefs={columnDefs}
+                rowData={rowData}
+                rowSelection={'multiple'}
+            />
+        </div>
+    );
+};
+
+const Dashboard = () => {
     return (
-        <>
-            <Card>
-                <Card.Body>
-                    <h2 className='text-center mb-4'>Profile</h2>
-                    {error && <Alert variant="danger">{error}</Alert>}
-                    Email: {currentUser.email}
-                    <Link to="/update-profile" className="btn btn-primary w-100 mt-3">Update Profile</Link>
-                </Card.Body>
-            </Card>
-            <div className="w-100 text-center mt-2">
-                <Button variant="link" onClick={handleLogout} >Log Out</Button>
+        <ThemeProvider 
+            breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']} 
+            minBreakpoint="xxs">
+            <div>
+                <Navigation/>
+                <MyGridComponent />
             </div>
-        </>
-    )
-}
+        </ThemeProvider>
+    );
+};
+
+
+export default Dashboard;

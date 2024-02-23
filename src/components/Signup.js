@@ -3,6 +3,7 @@ import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
+
 export default function Sighup() {
     const emailRef = useRef();
     const passwordRef = useRef();
@@ -24,6 +25,7 @@ export default function Sighup() {
             setLoading(true);
             await signup(emailRef.current.value, passwordRef.current.value)
             navigate("/")
+
         } catch {
             setError('Failed to sign up. Please, try again.')
         }

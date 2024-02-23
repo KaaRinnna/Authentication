@@ -12,10 +12,10 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     function signup(email, password) {
-        return auth.createUserWithEmailAndPassword(email, password); //! то же самое для signup
+        return auth.createUserWithEmailAndPassword(email, password);
     }
 
-    function login(email, password) {//!if u dont want to use firebase you can change this to log to your server
+    function login(email, password) {
         return auth.signInWithEmailAndPassword(email, password);
     }
 
@@ -32,7 +32,6 @@ export function AuthProvider({ children }) {
         return unsubscribe;
     }, []);
 
-    
 
     const value = {
         currentUser,
