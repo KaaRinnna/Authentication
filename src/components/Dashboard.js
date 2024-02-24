@@ -1,11 +1,12 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { AgGridReact } from "ag-grid-react";
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/database';
 import { getDatabase, ref, get } from "firebase/database";
-import ThemeProvider from 'react-bootstrap/ThemeProvider'
+import { ThemeProvider, Button } from "react-bootstrap";
 import Navigation from "./Navbar";
 
 const MyGridComponent = () => {
@@ -22,6 +23,25 @@ const MyGridComponent = () => {
 
     const database = getDatabase(app);
     const [rowData, setRowData] = useState([]);
+    const { currentUser } = useAuth();
+    const [userStatus, setUserStatus] = useState('');
+
+
+    useEffect(() => {
+        if (currentUser) {
+            const userId = currentUser.uid;
+            const userRef = ref(database, `database/users/${userId}`);
+
+            get(userRef).then((snapshot) => {
+                if(snapshot.exists()) {
+                    const userData = snapshot.val();
+                    setUserStatus(userData.status || 'active');
+                }
+            }).catch((error) => {
+                console.error('Error fetching user data:', error);
+            });
+        }
+    }, [currentUser]);
 
     useEffect(() => {
         const dbRef = ref(database, 'database/users/');
@@ -45,7 +65,6 @@ const MyGridComponent = () => {
         });
     }, [database]);
 
-
     const columnDefs = [
         { 
             headerName: 'userId', 
@@ -60,13 +79,21 @@ const MyGridComponent = () => {
         { headerName: 'Status', field: 'status' },
     ];
 
+
     return ( 
-        <div className="ag-theme-quartz" style={{ height: 600, Maxwidth: '70vw', minWidth: '40vw' }}>
-            <AgGridReact 
-                columnDefs={columnDefs}
-                rowData={rowData}
-                rowSelection={'multiple'}
-            />
+        <div>
+            {userStatus === 'active' ? (
+                <div className="ag-theme-quartz" style={{ height: 600, Maxwidth: '70vw', minWidth: '40vw' }}>
+                <AgGridReact 
+                    columnDefs={columnDefs}
+                    rowData={rowData}
+                    rowSelection={'multiple'}
+                />
+            </div>
+            ) : (
+                <h1>Acces denied. Your account has been blocked.</h1>
+            )}
+            
         </div>
     );
 };
@@ -78,6 +105,7 @@ const Dashboard = () => {
             minBreakpoint="xxs">
             <div>
                 <Navigation/>
+                <Button >Delete</Button>
                 <MyGridComponent />
             </div>
         </ThemeProvider>

@@ -1,7 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { auth } from '../firebase';
+import { auth} from '../firebase';
 import { writeUserData } from '../firebase';
 import { serverTimestamp, ref, update } from 'firebase/database';
+
 import { database } from '../firebase';
 const AuthContext = React.createContext();
 
@@ -16,11 +17,13 @@ export function AuthProvider({ children }) {
     async function signup(email, name, password) {
         try {
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            
             const userId = userCredential.user.uid;
             const userEmail = email;
             const username = name;
             const userRegTime = serverTimestamp();
-            writeUserData(userId, userEmail, username, userRegTime);
+            const status = 'active';
+            writeUserData(userId, userEmail, username, userRegTime, status);
             return userCredential;
         } catch (error) {
             throw error;

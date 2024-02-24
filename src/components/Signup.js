@@ -55,7 +55,7 @@ export default function Sighup() {
                             <Form.Label>Password Confirmation</Form.Label>
                             <Form.Control type="password" ref={passwordConfirmRef} required />
                         </Form.Group>
-                        <Button  disabled={loading} className='w-100' style={{ marginTop: '3rem' }} type="submit">Sign Up</Button>
+                        <Button disabled={loading} className='w-100' style={{ marginTop: '3rem' }} type="submit">Sign Up</Button>
                     </Form>
                 </Card.Body>
             </Card>
