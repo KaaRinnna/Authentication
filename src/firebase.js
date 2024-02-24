@@ -18,11 +18,10 @@ export default app;
 
 export const database = getDatabase(app);
 
-function writeUserData(userId, email, name,) {
+export function writeUserData(userId, email, name, registrationTime) {
   set(ref(database, 'database/users/' + userId), {
     email: email,
     username: name,
+    regTime: registrationTime,
   });
 }
-
-writeUserData('userId3', 'test3@222.com', 'Test');

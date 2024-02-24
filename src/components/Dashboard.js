@@ -28,7 +28,15 @@ const MyGridComponent = () => {
         get(dbRef).then((snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                setRowData(Object.values(data));
+                const formattedData = Object.values(data).map((user) => {
+                    return {
+                        ...user,
+                        regTime: new Date(user.regTime).toLocaleString(),
+                        lastLoginTime: new Date(user.lastLoginTime).toLocaleString(),
+                    };
+                });
+
+                setRowData(formattedData);
             } else {
                 console.log('No data available');
             }
@@ -36,6 +44,7 @@ const MyGridComponent = () => {
             console.error(error);
         });
     }, [database]);
+
 
     const columnDefs = [
         { 
@@ -45,11 +54,14 @@ const MyGridComponent = () => {
             checkboxSelection: true, 
         },
         { headerName: 'Email', field: 'email' },
-        { headerName: 'Username', field: 'username' },
+        { headerName: 'Name', field: 'username' },
+        { headerName: 'Registration Time', field: 'regTime'},
+        { headerName: 'Last Login Time', field: 'lastLoginTime'},
+        { headerName: 'Status', field: 'status' },
     ];
 
     return ( 
-        <div className="ag-theme-quartz" style={{ height: 300, Maxwidth: '70vw', minWidth: '30vw' }}>
+        <div className="ag-theme-quartz" style={{ height: 600, Maxwidth: '70vw', minWidth: '40vw' }}>
             <AgGridReact 
                 columnDefs={columnDefs}
                 rowData={rowData}

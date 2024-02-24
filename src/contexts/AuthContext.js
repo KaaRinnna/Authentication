@@ -1,22 +1,50 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { auth } from '../firebase';
-
+import { writeUserData } from '../firebase';
+import { serverTimestamp, ref, update } from 'firebase/database';
+import { database } from '../firebase';
 const AuthContext = React.createContext();
 
 export function useAuth() {
-    return useContext(AuthContext)
-};
+    return useContext(AuthContext);
+}
 
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState();
     const [loading, setLoading] = useState(true);
 
-    function signup(email, password) {
-        return auth.createUserWithEmailAndPassword(email, password);
+    async function signup(email, name, password) {
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            const userId = userCredential.user.uid;
+            const userEmail = email;
+            const username = name;
+            const userRegTime = serverTimestamp();
+            writeUserData(userId, userEmail, username, userRegTime);
+            return userCredential;
+        } catch (error) {
+            throw error;
+        }
+        
     }
 
-    function login(email, password) {
-        return auth.signInWithEmailAndPassword(email, password);
+    async function login(email, password) {
+        try {
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            const userId = userCredential.user.uid;
+            const lastLoginTime = serverTimestamp();
+            updatelastLoginTime(userId, lastLoginTime);
+            return userCredential;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    function updatelastLoginTime(userId, lastLoginTime) {
+        const userRef = ref(database, `database/users/${userId}`);
+        update(userRef, {
+            lastLoginTime: lastLoginTime,
+        });
     }
 
     function logout() {

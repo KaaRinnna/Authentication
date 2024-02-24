@@ -3,8 +3,8 @@ import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
-
 export default function Sighup() {
+    const nameRef = useRef();
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
@@ -23,7 +23,7 @@ export default function Sighup() {
         try {
             setError("");
             setLoading(true);
-            await signup(emailRef.current.value, passwordRef.current.value)
+            await signup(emailRef.current.value, nameRef.current.value, passwordRef.current.value)
             navigate("/")
 
         } catch {
@@ -43,6 +43,10 @@ export default function Sighup() {
                             <Form.Label>Email</Form.Label>
                             <Form.Control type="email" ref={emailRef} required />
                         </Form.Group>
+                        <Form.Group id="username">
+                            <Form.Label>Name</Form.Label>
+                            <Form.Control type="text" ref={nameRef} required />
+                        </Form.Group>
                         <Form.Group id="password">
                             <Form.Label>Password</Form.Label>
                             <Form.Control type="password" ref={passwordRef} required />
@@ -51,7 +55,7 @@ export default function Sighup() {
                             <Form.Label>Password Confirmation</Form.Label>
                             <Form.Control type="password" ref={passwordConfirmRef} required />
                         </Form.Group>
-                        <Button  disabled={loading} className='w-100' type="submit">Sign Up</Button>
+                        <Button  disabled={loading} className='w-100' style={{ marginTop: '3rem' }} type="submit">Sign Up</Button>
                     </Form>
                 </Card.Body>
             </Card>
